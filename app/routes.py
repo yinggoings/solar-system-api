@@ -34,6 +34,9 @@ def get_planets():
 
 @planets_bp.route("/<id>",methods=["GET"])
 def get_planet(id):
+    if not id.isnumeric():
+        print("NOT NUMERIC")
+        return {"unsuccessful":f"id {id} is invalid"}, 400
     planet_response = {}
     for planet in planets:
         if planet.id == int(id):
@@ -41,7 +44,9 @@ def get_planet(id):
             planet_response["name"] = planet.name,
             planet_response["description"] = planet.description,
             planet_response["moons"] = planet.moons
-    return jsonify(planet_response), 200
+    if planet_response:
+        return planet_response, 200
+    return {"unsuccessful":f"id {id} does not exit"}, 404
     
 
 
