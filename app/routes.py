@@ -31,3 +31,26 @@ def get_planets():
             "moons": planet.moons
         })
     return jsonify(planets_response), 200
+
+@planets_bp.route("/<id>",methods=["GET"])
+def get_planet(id):
+    print(id)
+    planet_response = {}
+    for planet in planets:
+        print(planet.id)
+        if planet.id == int(id):
+            planet_response["id"] = planet.id,
+            planet_response["name"] = planet.name,
+            planet_response["description"] = planet.description,
+            planet_response["moons"] = planet.moons
+        print(planet_response)
+    return jsonify(planet_response), 200
+    
+
+
+
+
+
+
+# can we use name/other non-pk attribute instead of id/pk for endpoint?
+# do we need to feed id argument into function?
