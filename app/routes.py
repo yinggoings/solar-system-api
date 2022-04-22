@@ -30,4 +30,4 @@ def get_planets():
             "description": planet.description,
             "moons": planet.moons
         })
-    return jsonify(planets_response)
+    return jsonify(planets_response), 200
