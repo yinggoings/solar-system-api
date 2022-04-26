@@ -34,8 +34,10 @@ def get_planets():
 
 @planets_bp.route("/<id>",methods=["GET"])
 def get_planet(id):
-    if not id.isnumeric():
-        return {"unsuccessful":f"id {id} is invalid"}, 400
+    try:
+        id = int(id)
+    except TypeError:
+        return {"unsuccessful":f"id {id} is invalid"}, 400   
     for planet in planets:
         if planet.id == int(id):
             return {
