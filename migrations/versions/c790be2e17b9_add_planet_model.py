@@ -1,8 +1,8 @@
 """add Planet model
 
-Revision ID: 92245e74c7f2
+Revision ID: c790be2e17b9
 Revises: 
-Create Date: 2022-04-29 11:24:29.695835
+Create Date: 2022-04-29 11:42:10.720340
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '92245e74c7f2'
+revision = 'c790be2e17b9'
 down_revision = None
 branch_labels = None
 depends_on = None

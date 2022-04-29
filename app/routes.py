@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, make_response, abort
+from flask import Blueprint, jsonify, make_response, abort, request
 from app.models.planet import Planet
+from app import db
 
 # class Planet:
 #     def __init__(self, id, name, description, moons):
@@ -23,15 +24,31 @@ planets_bp = Blueprint("planets_bp",__name__,url_prefix="/planets")
 
 @planets_bp.route("",methods=["GET"])
 def get_planets():
+    planets = Planet.query.all()
     planets_response = []
     for planet in planets:
         planets_response.append({
             "id": planet.id,
             "name": planet.name,
             "description": planet.description,
+            "order_from_sun": planet.order_from_sun,
             "moons": planet.moons
         })
     return jsonify(planets_response), 200
+
+@planets_bp.route("", methods=["POST"])
+def add_planet():
+    request_body = request.get_json()
+    new_planet = Planet(
+        name = request_body["name"],
+        description = request_body["description"],
+        order_from_sun = request_body["order_from_sun"],
+        moons = request_body["moons"]
+    )
+    db.session.add(new_planet)
+    db.session.commit()
+
+    return make_response(f"Planet {new_planet.name} successfully created.", 201)
 
 @planets_bp.route("/<id>",methods=["GET"])
 def get_planet(id):
