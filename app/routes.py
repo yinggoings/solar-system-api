@@ -63,6 +63,35 @@ def get_planet(id):
         }
     return jsonify(planet_response), 200
 
+@planets_bp.route("/<id>", methods=["PATCH"])
+def update_planet(id):
+    request_body = request.get_json()
+    planets = Planet.query.all()
+    planet = handle_id_errors(id,planets)
+
+    valid_input = False
+
+    if "name" in request_body:
+        planet.name = request_body["name"]
+        valid_input = True
+    if "description" in request_body:
+        planet.description = request_body["description"]
+        valid_input = True
+    if "order_from_sun" in request_body:
+        planet.order_from_sun = request_body["order_from_sun"]
+        valid_input = True
+    if "moons" in request_body:
+        planet.moons = request_body["moons"]
+        valid_input = True
+    if not valid_input:
+        return jsonify({"unsuccessful": "no valid input given"}), 400
+
+    db.session.commit()
+
+    return jsonify({"successful": f"{planet.id} updated"}), 200
+
+
+
 @planets_bp.route("/<id>",methods=["PUT"])
 def replace_planet(id):
     request_body = request.get_json()
@@ -87,7 +116,7 @@ def replace_planet(id):
     }
     return jsonify(planet_response),200
 
-@planets_bp.route("/</id>",methods=["DELETE"])
+@planets_bp.route("/<id>",methods=["DELETE"])
 def delete_planet(id):
     planets = Planet.query.all()
     planet = handle_id_errors(id,planets)
