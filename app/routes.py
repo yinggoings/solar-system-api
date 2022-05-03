@@ -52,26 +52,61 @@ def add_planet():
 
 @planets_bp.route("/<id>",methods=["GET"])
 def get_planet(id):
-    planet = handle_id_errors(id)
+    planets = Planet.query.all()
+    planet = handle_id_errors(id,planets)
     planet_response = {
         "id":planet.id,
         "name":planet.name,
         "description":planet.description,
+        "order_from_sun":planet.order_from_sun,
         "moons":planet.moons
         }
     return jsonify(planet_response), 200
+
+@planets_bp.route("/<id>",methods=["PUT"])
+def replace_planet(id):
+    request_body = request.get_json()
+    planets = Planet.query.all()
+    planet = handle_id_errors(id,planets)
+    try:
+        planet.name = request_body["name"],
+        planet.description = request_body["description"],
+        planet.order_from_sun = request_body["order_from_sun"],
+        planet.moons = request_body["moons"]
+    except KeyError:
+        return {
+            "unsuccessful": "name, description, order_from_sun, moons are all required fields"
+        }
+    db.session.commit()
+    planet_response = {
+        "id":planet.id,
+        "name":planet.name,
+        "description":planet.description,
+        "order_from_sun":planet.order_from_sun,
+        "moons":planet.moons
+    }
+    return jsonify(planet_response),200
+
+@planets_bp.route("/</id>",methods=["DELETE"])
+def delete_planet(id):
+    planets = Planet.query.all()
+    planet = handle_id_errors(id,planets)
+    db.session.delete(planet)
+    db.session.commit()
+    return {"successful": f"planet #{id} is successfully deleted"},200
+
     
-def handle_id_errors(id):
+def handle_id_errors(id,planets):
     try:
         id = int(id)
-    except:
+    except ValueError:
         abort(make_response({"unsuccessful":f"id {id} is invalid"}, 400))
 
     for planet in planets:
         if planet.id == id:
             return planet
     
-    abort(make_response({"unsuccessful":f"id {id} does not exit"}, 404)) 
+    abort(make_response({"unsuccessful":f"id {id} does not exist"}, 404)) 
 
 
 
