@@ -22,18 +22,27 @@ from app import db
 
 planets_bp = Blueprint("planets_bp",__name__,url_prefix="/planets")
 
+# standard webdev guidelines: try to limit to 3 otherwise consider more routes - it's ok to type more if it makes it more secure!
 @planets_bp.route("",methods=["GET"])
 def get_planets():
-    planets = Planet.query.all()
+    params = request.args
+    if len(params) == 0:
+        planets = Planet.query.all()
+    else:
+        command_str = "Planet.query"
+        for k,v in params.items():
+            command_str += f".filter_by({k}='{v}')"
+        planets = eval(command_str)
     planets_response = []
-    for planet in planets:
-        planets_response.append({
-            "id": planet.id,
-            "name": planet.name,
-            "description": planet.description,
-            "order_from_sun": planet.order_from_sun,
-            "moons": planet.moons
-        })
+    if planets:
+        for planet in planets:
+            planets_response.append({
+                "id": planet.id,
+                "name": planet.name,
+                "description": planet.description,
+                "order_from_sun": planet.order_from_sun,
+                "moons": planet.moons
+            })
     return jsonify(planets_response), 200
 
 @planets_bp.route("", methods=["POST"])
@@ -47,7 +56,6 @@ def add_planet():
     )
     db.session.add(new_planet)
     db.session.commit()
-
     return make_response(f"Planet {new_planet.name} successfully created.", 201)
 
 @planets_bp.route("/<id>",methods=["GET"])
@@ -68,9 +76,7 @@ def update_planet(id):
     request_body = request.get_json()
     planets = Planet.query.all()
     planet = handle_id_errors(id,planets)
-
     valid_input = False
-
     if "name" in request_body:
         planet.name = request_body["name"]
         valid_input = True
@@ -85,12 +91,8 @@ def update_planet(id):
         valid_input = True
     if not valid_input:
         return jsonify({"unsuccessful": "no valid input given"}), 400
-
     db.session.commit()
-
     return jsonify({"successful": f"{planet.id} updated"}), 200
-
-
 
 @planets_bp.route("/<id>",methods=["PUT"])
 def replace_planet(id):
@@ -124,17 +126,15 @@ def delete_planet(id):
     db.session.commit()
     return {"successful": f"planet #{id} is successfully deleted"},200
 
-    
+
 def handle_id_errors(id,planets):
     try:
         id = int(id)
     except ValueError:
         abort(make_response({"unsuccessful":f"id {id} is invalid"}, 400))
-
     for planet in planets:
         if planet.id == id:
             return planet
-    
     abort(make_response({"unsuccessful":f"id {id} does not exist"}, 404)) 
 
 
